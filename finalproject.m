@@ -35,8 +35,8 @@
 clc; clear all; close all;
 a=xray;
 % a.userinput
-n=1;
-a.d=300;
+n=300;
+a.d=150;
 so=a.d;
 a.thick=50;
 %a.si=200;
@@ -47,19 +47,39 @@ m2=a.curvedrefrac(a.nair,a.nglass,a.R1);
 m3=a.propdist(a.thick);
 m4=a.curvedrefrac(a.nglass,a.nair,-a.R1);
 m5=a.propdist(si);
-Ang=2*atan((a.lensd/2)/so)*rand(n,1)-atan((a.lensd/2)/so);
+ang=2*atan((a.lensd/2)/so)*rand(n,1)-atan((a.lensd/2)/so);
 v(1,:)=zeros(1,n);
-v(2,:)=Ang;
+v(2,:)=ang;
+%%
 v=m2*m1*v;
 yplot=v(1,:);
 figure; plot([0,so],[zeros(n,1),yplot'],'r');
 hold on;
-%%
 v=m4*m3*v;
 plot([so,so+a.thick],[yplot',(v(1,:))'],'r');
 yplot=v(1,:);
-%%
 v=m5*v;
-
 plot([so+a.thick,so+a.thick+si],[yplot',(v(1,:))'],'r');
 hold off;
+%%
+mflat=a.flatrefrac(1,0.1);
+flatvec(2,:)=ang;
+flatvec=m1*flatvec;
+yplot=flatvec(1,:);
+figure; plot([0,so],[zeros(n,1),yplot'],'r');
+hold on;
+flatvec=m5*mflat*flatvec;
+plot([so,so+a.thick],[yplot',(flatvec(1,:))'],'r');
+yplot=flatvec(1,:);
+%%
+thickl=a.thicklens(1,a.nglass,100,-1,a.thick);
+tvec(2,:)=ang;
+tvec=m1*tvec;
+yplot=tvec(1,:);
+figure; plot([0,so],[zeros(n,1),yplot'],'b');
+hold on;
+tvec=thickl*tvec;
+plot([so,so+a.thick],[yplot',(tvec(1,:))'],'b');
+yplot=tvec(1,:);
+m5=a.propdist(si);
+plot([so+a.thick,so+a.thick+si],[yplot',(tvec(1,:))'],'b');

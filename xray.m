@@ -4,10 +4,9 @@ classdef xray
         x2; % userinput 2
         x3; % userinput 3
         x4; % userinput 4
-        x5; % function defined
-        x6; % function defined
-        x7; % function defined
-        x8; % function defined
+        ncarbon;
+        ngold;
+        nsilver;
         n1=1;
         n2=1.5;
         nglass=1.4;
@@ -80,8 +79,12 @@ classdef xray
             end
         end
         % refraction: flat interface
-        function out=flatrefrac(dum)
-            out=[1,0;0,dum.n1/dum.n2];
+        function out=flatrefrac(dum,n1,n2)
+            if n1==0 && n2==0
+                out=[1,0;0,dum.n1/dum.n2];
+            else
+                out=[1,0;0,n1/n2];
+            end
         end
         % refraction: curved interface
         function out=curvedrefrac(dum,n1,n2,R)
@@ -104,11 +107,18 @@ classdef xray
             end
         end
         % refraction: thick lens
-        function out=thicklens(dum)
-            surf2=[1,0;(dum.n1-dum.n2)./dum.R1*dum.n2,dum.n1./dum.n2];
-            surf1=[1,0;(dum.n2-dum.n1)./dum.R2*dum.n1,dum.n2./dum.n1];
-            thickness=[1,dum.thick;0,1];
-            out=surf2*thickness*surf1;
+        function out=thicklens(dum,n1,n2,R1,R2,t)
+            if n1==0&&n2==0&&R1==0&&R2==0&&t==0
+                surf2=[1,0;(dum.n1-dum.n2)./dum.R1*dum.n2,dum.n1./dum.n2];
+                surf1=[1,0;(dum.n2-dum.n1)./dum.R2*dum.n1,dum.n2./dum.n1];
+                thickness=[1,dum.thick;0,1];
+                out=surf2*thickness*surf1;
+            else
+                surf1=[1,0;(n1-n2)/(R1*n2),n1/n2];
+                surf2=[1,0;(n2-n1)/(R2*n1),n2/n1];
+                thickness=[1,t;0,1];
+                out=surf2*thickness*surf1;
+            end
         end
         % refraction: single prism
         function out=singleprism(dum)
