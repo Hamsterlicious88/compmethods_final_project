@@ -85,11 +85,11 @@ classdef xray
         end
         % refraction: curved interface
         function out=curvedrefrac(dum,n1,n2,R)
-            %if n1==0 && n2==0 && R==0
-               % out=[1,0;(dum.n2-dum.n1)/dum.R*dum.n2,dum.n1/dum.n2];
-            %else
+            if n1==0 && n2==0 && R==0
+                out=[1,0;(dum.n2-dum.n1)/dum.R*dum.n2,dum.n1/dum.n2];
+            else
                 out=[1,0;(n1-n2)/(R*n2),n1/n2];
-            %end
+            end
         end
         % reflection: flat mirror
         function out=mirrorreflec(dum)
