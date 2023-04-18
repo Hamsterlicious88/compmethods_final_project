@@ -35,8 +35,8 @@
 clc; clear all; close all;
 a=xray;
 % a.userinput
-n=50;
-a.d=300;
+n=100;
+a.d=150;
 so=a.d;
 a.thick=50;
 %a.si=200;
@@ -47,38 +47,43 @@ m2=a.curvedrefrac(a.nair,a.nglass,a.R1);
 m3=a.propdist(a.thick);
 m4=a.curvedrefrac(a.nglass,a.nair,-a.R1);
 m5=a.propdist(si);
-ang=2*atan((a.lensd/2)/so)*rand(n,1)-atan((a.lensd/2)/so);
-v(1,:)=zeros(1,n);
-v(2,:)=ang;
 %%
-v=m2*m1*v;
-yplot=v(1,:);
+vec(1,:)=zeros(1,n);
+vec(2,:)=a.ang(n,so);
+vec=m2*m1*vec;
+yplot=vec(1,:);
 figure; plot([0,so],[zeros(n,1),yplot'],'r');
 hold on;
-v=m4*m3*v;
-plot([so,so+a.thick],[yplot',(v(1,:))'],'r');
-yplot=v(1,:);
-v=m5*v;
-plot([so+a.thick,so+a.thick+si],[yplot',(v(1,:))'],'r');
+vec=m4*m3*vec;
+plot([so,so+a.thick],[yplot',(vec(1,:))'],'r');
+yplot=vec(1,:);
+vec=m5*vec;
+plot([so+a.thick,so+a.thick+si],[yplot',(vec(1,:))'],'r');
 hold off;
 %%
-mflat=a.flatrefrac(a.nglass,a.nair);
-flatvec(2,:)=ang;
+mflat=a.flatrefrac(a.nair,a.ncarbon);
+flatvec(1,:)=zeros(n,1);
+flatvec(2,:)=a.ang(n,so);
 flatvec=m1*flatvec;
 yplot=flatvec(1,:);
-figure; plot([0,so],[zeros(n,1),yplot'],'r');
+figure; plot([0,so],[zeros(n,1),yplot'],'r'); title('ray tracing for complex index of refraction')
 hold on;
 flatvec=m5*mflat*flatvec;
 plot([so,so+a.thick],[yplot',(flatvec(1,:))'],'r');
 yplot=flatvec(1,:);
 %%
-mirrorreflec=a.mirrorreflec;
-mvec(2,:)=ang;
-mvec=m1*mvec;
-yplot=mvec(1,:);
+thickl=a.thicklens(a.nglass,a.nglass,50,-50,a.thick);
+tvec(1,:)=zeros(n,1);
+tvec(2,:)=a.ang(n,so);
+tvec=m1*tvec;
+yplot=tvec(1,:);
 figure; plot([0,so],[zeros(n,1),yplot'],'b');
 hold on;
+tvec=thickl*tvec;
+plot([so,so+a.thick],[yplot',(tvec(1,:))'],'b');
+yplot=tvec(1,:);
 m5=a.propdist(si);
-mvec=m5*mirrorreflec*mvec;
-plot([so,so+a.thick],[yplot',(mvec(1,:))'],'b');
-yplot=mvec(1,:);
+plot([so+a.thick,so+a.thick+si],[yplot',(tvec(1,:))'],'b');
+%%
+% detector(tvec',length(tvec))
+mean=30

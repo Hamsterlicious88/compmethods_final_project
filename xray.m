@@ -4,9 +4,9 @@ classdef xray
         x2; % userinput 2
         x3; % userinput 3
         x4; % userinput 4
-        ncarbon;
-        ngold;
-        nsilver;
+        ncarbon=1-4.8155e-4-1i*4.8121e-05;
+        ngold=1-2.1062e-3-1i*1.0306e-3;
+        nsilver=1-1.5720e-3-1i*7.3590e-4;
         n1=1;
         n2=1.5;
         nglass=1.4;
@@ -21,7 +21,7 @@ classdef xray
         R2=100;
         f;
         thick;
-        lensd=20;
+        lensdiam=20;
         k;
     end
 
@@ -38,12 +38,13 @@ classdef xray
         % gaussian weighted detector from in class. Here, instead of using
         % random initial coordinates I'll use the beam locations as the
         % location for a point. Also want to rewrite this to be neater.
-        function detector(dum)
+        function out=detector(dum,vec,numpoints)
             % dim=linspace(0,30);
             mean=30;
             sigma=10;
-            numpoints=10000;
-            m=sigma*randn(numpoints,2)+mean;
+            %numpoints=10000;
+            m=vec;
+            %m=sigma*randn(numpoints,2)+mean;
             figure;scatter(m(:,1),m(:,2));
             det=zeros(30);
             for i=1:10000
@@ -124,7 +125,10 @@ classdef xray
         function out=singleprism(dum)
             out=[dum.k,dum.dp/n*dum.k;0,1/dum.k];
         end
-
+        % function to generate new random angles for each call
+        function out=ang(dum,n,so)
+            out=2*atan((dum.lensdiam/2)/so)*randn(n,1)-atan((dum.lensdiam/2)/so);
+        end
     end
     methods(Static)
     end
