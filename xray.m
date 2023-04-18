@@ -47,7 +47,7 @@ classdef xray
             %m=sigma*randn(numpoints,2)+mean;
             figure;scatter(m(:,1),m(:,2));
             det=zeros(30);
-            for i=1:10000
+            for i=1:numpoints
                 jj=round(m(i,1)/2);
                 kk=round(m(i,2)/2);
                 if jj<1 

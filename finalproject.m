@@ -85,7 +85,7 @@ yplot=tvec(1,:);
 m5=a.propdist(si);
 plot([so+a.thick,so+a.thick+si],[yplot',(tvec(1,:))'],'b');
 %%
-% detector(tvec',length(tvec))
+a.detector(tvec',length(tvec))
 mean=30;
 sigma=10;
 m=sigma*tvec'+mean;
