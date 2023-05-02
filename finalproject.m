@@ -36,57 +36,76 @@ clc; clear all; close all;
 a=xray;
 % a.userinput
 n=100;
+m=400;
 a.d=150;
 so=a.d;
-a.thick=50;
+a.thick=0;
 %a.si=200;
 f=1/((a.nglass-1)*2/a.R1);
 si=1/(1/f-1/so);
 m1=a.propdist(so);
 m2=a.curvedrefrac(a.nair,a.nglass,a.R1);
-m3=a.propdist(a.thick);
+m3=a.propdist(1);
 m4=a.curvedrefrac(a.nglass,a.nair,-a.R1);
 m5=a.propdist(si);
+mm1=repmat(m1,1,1,n);
+mm2=repmat(m2,1,1,n);
+mm3=repmat(m3,1,1,n);
+mm4=repmat(m4,1,1,n);
+mm5=repmat(m5,1,1,n);
+vec(1,:,:)=zeros(1,n,n);
+vec(2,:,:)=a.ang(n,so);
+
+
 %%
-vec(1,:)=zeros(1,n);
-vec(2,:)=a.ang(n,so);
-vec=m2*m1*vec;
-yplot=vec(1,:);
-figure; plot([0,so],[zeros(n,1),yplot'],'r');
+% vec(1,:)=zeros(1,n);
+% vec(2,:)=a.ang(n,so);
+vec=pagemtimes(mm1,vec);
+vec=pagemtimes(mm2,vec);
+yplot=vec(1,:,:);
+figure; plot([0,so],[zeros(n,1),yplot(1,:,1)'],'r');
 hold on;
-vec=m4*m3*vec;
-plot([so,so+a.thick],[yplot',(vec(1,:))'],'r');
-yplot=vec(1,:);
-vec=m5*vec;
-plot([so+a.thick,so+a.thick+si],[yplot',(vec(1,:))'],'r');
+vec=pagemtimes(mm3,vec);
+vec=pagemtimes(mm4,vec);
+plot([so,so+a.thick],[yplot(1,:,1)',(vec(1,:,1))'],'r');
+yplot=vec(1,:,:);
+vec=pagemtimes(mm5,vec);
+plot([so+a.thick,so+a.thick+si],[yplot(1,:,1)',(vec(1,:,1))'],'r');
 hold off;
 %%
-mflat=a.flatrefrac(a.nair,a.ncarbon);
-flatvec(1,:)=zeros(n,1);
-flatvec(2,:)=a.ang(n,so);
-flatvec=m1*flatvec;
-yplot=flatvec(1,:);
+a.thick=30;
+mflat=a.flatrefrac(a.nair,a.nglass);
+mmflat=repmat(mflat,1,1,n);
+flatvec(1,:,:)=zeros(1,n,n);
+flatvec(2,:,:)=a.ang(n,so);
+flatvec=pagemtimes(mm1,flatvec);
+yplot=flatvec(1,:,1);
 figure; plot([0,so],[zeros(n,1),yplot'],'r'); title('ray tracing for complex index of refraction')
 hold on;
-flatvec=m5*mflat*flatvec;
-plot([so,so+a.thick],[yplot',(flatvec(1,:))'],'r');
-yplot=flatvec(1,:);
+flatvec=pagemtimes(mmflat,flatvec);
+flatvec=pagemtimes(mm5,flatvec);
+plot([so,so+a.thick],[yplot',(flatvec(1,:,1))'],'r');
+%yplot=flatvec(1,:,1);
 %%
-thickl=a.thicklens(a.nglass,a.nglass,50,-50,a.thick);
-tvec(1,:)=zeros(n,1);
-tvec(2,:)=a.ang(n,so);
-tvec=m1*tvec;
-yplot=tvec(1,:);
-figure; plot([0,so],[zeros(n,1),yplot'],'b');
+a.thick=100;
+thickl=a.thicklens(a.nair,a.nglass,100,-100,a.thick);
+%thickl=a.thicklens(0,0,0,0,0);
+mthickl=repmat(thickl,1,1,n);
+tvec(1,:,:)=zeros(1,n,n);
+tvec(2,:,:)=a.ang(n,so);
+tvec=pagemtimes(mm1,tvec);
+yplot=tvec(1,:,1);
+figure; plot([0,so],[zeros(n,1),yplot(1,:,1)'],'b');
 hold on;
-tvec=thickl*tvec;
-plot([so,so+a.thick],[yplot',(tvec(1,:))'],'b');
-yplot=tvec(1,:);
-m5=a.propdist(si);
-plot([so+a.thick,so+a.thick+si],[yplot',(tvec(1,:))'],'b');
+tvec=pagemtimes(mthickl,tvec);
+plot([so,so+a.thick],[yplot',(tvec(1,:,1))'],'b');
+yplot=tvec(1,:,1);
+tvec=pagemtimes(mm5,tvec);
+%m5=a.propdist(si);
+plot([so+a.thick,so+a.thick+si],[yplot(1,:,1)',(tvec(1,:,1))'],'b');
 %%
-a.detector(tvec',length(tvec))
+a.detector(pagetranspose(tvec),length(tvec))
 mean=30;
 sigma=10;
-m=sigma*tvec'+mean;
-figure; scatter(m(:,1),m(:,2))
+m=sigma*pagetranspose(tvec)+mean;
+

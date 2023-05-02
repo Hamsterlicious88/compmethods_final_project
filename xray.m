@@ -11,16 +11,16 @@ classdef xray
         n2=1.5;
         nglass=1.4;
         nair=1;
-        nwater;
+        nwater=1.333;
         beta;
         d;
         si;
         dp; % prism path length
         R;
         R1=100;
-        R2=100;
+        R2=-100;
         f;
-        thick;
+        thick=50;
         lensdiam=20;
         k;
     end
@@ -45,19 +45,25 @@ classdef xray
             %numpoints=10000;
             m=vec;
             %m=sigma*randn(numpoints,2)+mean;
-            figure;scatter(m(:,1),m(:,2));
-            det=zeros(30);
+            %figure; hold on
+%             for i=1:numpoints
+%             scatter(i,m(:,2,i));
+%             end
+            %hold off
+            det=zeros(80);
+            for ll=1:numpoints
+                m=m(:,:,ll);
             for i=1:numpoints
-                jj=round(m(i,1)/2);
-                kk=round(m(i,2)/2);
+                jj=round(m(i,1,ll)/2);
+                kk=round(m(i,2,ll)/2);
                 if jj<1 
                    jj=1;
                 end
-                if jj>30 
-                   jj=30;
+                if jj>80 
+                   jj=80;
                 end
-                if kk>30
-                   kk=30;
+                if kk>80
+                   kk=80;
                 end
                 if kk<1
                     kk=1;
@@ -65,8 +71,9 @@ classdef xray
                 
                 det(jj,kk)=det(jj,kk)+1;
             end
+            end
             
-            figure, imagesc(det);colormap turbo;
+            figure; imagesc(det);colormap turbo;
         end
         % the following functions define the matrix representations for
         % geometrical optical ray tracing
@@ -110,13 +117,13 @@ classdef xray
         % refraction: thick lens
         function out=thicklens(dum,n1,n2,R1,R2,t)
             if n1==0&&n2==0&&R1==0&&R2==0&&t==0
-                surf2=[1,0;(dum.n1-dum.n2)./dum.R1*dum.n2,dum.n1./dum.n2];
-                surf1=[1,0;(dum.n2-dum.n1)./dum.R2*dum.n1,dum.n2./dum.n1];
+                surf2=[1,0;(dum.n1-dum.n2)/(dum.R1*dum.n2),dum.n1/dum.n2];
+                surf1=[1,0;(dum.n2-dum.n1)/(dum.R2*dum.n1),dum.n2/dum.n1];
                 thickness=[1,dum.thick;0,1];
                 out=surf2*thickness*surf1;
             else
-                surf1=[1,0;(n1-n2)/(R1*n2),n1/n2];
-                surf2=[1,0;(n2-n1)/(R2*n1),n2/n1];
+                surf2=[1,0;(n1-n2)/(R1*n2),n1/n2];
+                surf1=[1,0;(n2-n1)/(R2*n1),n2/n1];
                 thickness=[1,t;0,1];
                 out=surf2*thickness*surf1;
             end
@@ -127,7 +134,7 @@ classdef xray
         end
         % function to generate new random angles for each call
         function out=ang(dum,n,so)
-            out=2*atan((dum.lensdiam/2)/so)*randn(n,1)-atan((dum.lensdiam/2)/so);
+            out=2*atan((dum.lensdiam/2)/so)*rand(n,1,n)-atan((dum.lensdiam/2)/so);
         end
     end
     methods(Static)
