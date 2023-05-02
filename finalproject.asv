@@ -35,17 +35,17 @@
 clc; clear all; close all;
 a=xray;
 % a.userinput
-n=100;
+n=50;
 m=400;
 a.d=150;
 so=a.d;
-a.thick=25;
+a.thick=0;
 %a.si=200;
 f=1/((a.nglass-1)*2/a.R1);
 si=1/(1/f-1/so);
 m1=a.propdist(so);
 m2=a.curvedrefrac(a.nair,a.nglass,a.R1);
-m3=a.propdist(a.thick);
+m3=a.propdist(1);
 m4=a.curvedrefrac(a.nglass,a.nair,-a.R1);
 m5=a.propdist(si);
 mm1=repmat(m1,1,1,n);
@@ -73,7 +73,8 @@ vec=pagemtimes(mm5,vec);
 plot([so+a.thick,so+a.thick+si],[yplot(1,:,1)',(vec(1,:,1))'],'r');
 hold off;
 %%
-mflat=a.flatrefrac(a.nair,a.nglass);
+a.thick=30;
+mflat=a.flatrefrac(a.ncarbon,a.nair);
 mmflat=repmat(mflat,1,1,n);
 flatvec(1,:,:)=zeros(1,n,n);
 flatvec(2,:,:)=a.ang(n,so);
@@ -86,12 +87,11 @@ flatvec=pagemtimes(mm5,flatvec);
 plot([so,so+a.thick],[yplot',(flatvec(1,:,1))'],'r');
 %yplot=flatvec(1,:,1);
 %%
-si=30;
-%thickl=a.thicklens(a.nglass,a.nglass,100,100,2);
-thickl=a.thicklens(0,0.nglass,100,100,2);
-
+a.thick=100;
+thickl=a.thicklens(a.nair,a.nglass,100,-100,a.thick);
+%thickl=a.thicklens(0,0,0,0,0);
 mthickl=repmat(thickl,1,1,n);
-tvec(1,:,:)=rand(1,n,n);
+tvec(1,:,:)=zeros(1,n,n);
 tvec(2,:,:)=a.ang(n,so);
 tvec=pagemtimes(mm1,tvec);
 yplot=tvec(1,:,1);
@@ -104,8 +104,7 @@ tvec=pagemtimes(mm5,tvec);
 %m5=a.propdist(si);
 plot([so+a.thick,so+a.thick+si],[yplot(1,:,1)',(tvec(1,:,1))'],'b');
 %%
-a.detector(pagetranspose(tvec),length(tvec))
-mean=30;
-sigma=10;
-m=sigma*pagetranspose(tvec)+mean;
+a.detector(flatvec,length(flatvec))
+%%
+a.detector(tvec,length(tvec))
 

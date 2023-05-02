@@ -43,38 +43,46 @@ classdef xray
             mean=30;
             sigma=10;
             %numpoints=10000;
+            %m=pagetranspose(vec);
             m=vec;
+            m=m+70;%round(max(m(:,1,:)));
+            detsize=60;
             %m=sigma*randn(numpoints,2)+mean;
-            %figure; hold on
-%             for i=1:numpoints
-%             scatter(i,m(:,2,i));
-%             end
-            %hold off
-            det=zeros(80);
-            for ll=1:numpoints
-                m=m(:,:,ll);
+            figure; hold on
+            title('array of ray locations (cross section)')
+            xlabel('x - horizontal');ylabel('y')
             for i=1:numpoints
-                jj=round(m(i,1,ll)/2);
-                kk=round(m(i,2,ll)/2);
-                if jj<1 
-                   jj=1;
+            scatter(i,m(2,:,i));
+            end
+            hold off
+            det=zeros(detsize);
+            for i=1:numpoints
+               
+            for ll=1:numpoints
+                %jj=round(m(i,1,ll)/2);
+                kk=round(m(1,i,ll)/2);
+                if ll<1 
+                   ll=1;
                 end
-                if jj>80 
-                   jj=80;
+                if ll>detsize
+                   ll=detsize;
                 end
-                if kk>80
-                   kk=80;
+                if kk>detsize
+                   kk=detsize;
                 end
                 if kk<1
-                    kk=1;
+                   kk=1;
                 end
                 
-                det(jj,kk)=det(jj,kk)+1;
+                det(ll,kk)=det(ll,kk)+1;
             end
             end
             
-            figure; imagesc(det);colormap turbo;
+            figure; imagesc(imrotate(det,90));colormap turbo;
+            title('Intensity detector')
+            xlabel('pix');ylabel('pix')
         end
+
         % the following functions define the matrix representations for
         % geometrical optical ray tracing
 
@@ -94,6 +102,7 @@ classdef xray
                 out=[1,0;0,n1/n2];
             end
         end
+
         % refraction: curved interface
         function out=curvedrefrac(dum,n1,n2,R)
             if n1==0 && n2==0 && R==0
@@ -102,10 +111,12 @@ classdef xray
                 out=[1,0;(n1-n2)/(R*n2),n1/n2];
             end
         end
+
         % reflection: flat mirror
         function out=mirrorreflec(dum)
             out=[1,0;0,1];
         end
+
         % refraction: thin lens
         function out=thinlens(dum,f)
             if f==0
@@ -114,6 +125,7 @@ classdef xray
                 out=[1,0;-1/f,1];
             end
         end
+
         % refraction: thick lens
         function out=thicklens(dum,n1,n2,R1,R2,t)
             if n1==0&&n2==0&&R1==0&&R2==0&&t==0
@@ -128,13 +140,15 @@ classdef xray
                 out=surf2*thickness*surf1;
             end
         end
+
         % refraction: single prism
         function out=singleprism(dum)
             out=[dum.k,dum.dp/n*dum.k;0,1/dum.k];
         end
+
         % function to generate new random angles for each call
         function out=ang(dum,n,so)
-            out=2*atan((dum.lensdiam/2)/so)*rand(n,1,n)-atan((dum.lensdiam/2)/so);
+            out=2*atan((dum.lensdiam/2)/so)*randn(n,1,n)-atan((dum.lensdiam/2)/so);
         end
     end
     methods(Static)

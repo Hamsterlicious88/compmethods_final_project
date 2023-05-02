@@ -35,7 +35,7 @@
 clc; clear all; close all;
 a=xray;
 % a.userinput
-n=100;
+n=50;
 m=400;
 a.d=150;
 so=a.d;
@@ -65,6 +65,8 @@ vec=pagemtimes(mm2,vec);
 yplot=vec(1,:,:);
 figure; plot([0,so],[zeros(n,1),yplot(1,:,1)'],'r');
 hold on;
+title('thin lens')
+xlabel('z - optical axis');ylabel('y')
 vec=pagemtimes(mm3,vec);
 vec=pagemtimes(mm4,vec);
 plot([so,so+a.thick],[yplot(1,:,1)',(vec(1,:,1))'],'r');
@@ -74,13 +76,14 @@ plot([so+a.thick,so+a.thick+si],[yplot(1,:,1)',(vec(1,:,1))'],'r');
 hold off;
 %%
 a.thick=30;
-mflat=a.flatrefrac(a.nair,a.nglass);
+mflat=a.flatrefrac(a.ncarbon,a.nair);
 mmflat=repmat(mflat,1,1,n);
 flatvec(1,:,:)=zeros(1,n,n);
 flatvec(2,:,:)=a.ang(n,so);
 flatvec=pagemtimes(mm1,flatvec);
 yplot=flatvec(1,:,1);
 figure; plot([0,so],[zeros(n,1),yplot'],'r'); title('ray tracing for complex index of refraction')
+xlabel('optical axis');ylabel('y')
 hold on;
 flatvec=pagemtimes(mmflat,flatvec);
 flatvec=pagemtimes(mm5,flatvec);
@@ -97,6 +100,8 @@ tvec=pagemtimes(mm1,tvec);
 yplot=tvec(1,:,1);
 figure; plot([0,so],[zeros(n,1),yplot(1,:,1)'],'b');
 hold on;
+title('Thick lens')
+xlabel('z - optical axis');ylabel('y')
 tvec=pagemtimes(mthickl,tvec);
 plot([so,so+a.thick],[yplot',(tvec(1,:,1))'],'b');
 yplot=tvec(1,:,1);
@@ -104,8 +109,7 @@ tvec=pagemtimes(mm5,tvec);
 %m5=a.propdist(si);
 plot([so+a.thick,so+a.thick+si],[yplot(1,:,1)',(tvec(1,:,1))'],'b');
 %%
-a.detector(pagetranspose(tvec),length(tvec))
-mean=30;
-sigma=10;
-m=sigma*pagetranspose(tvec)+mean;
+%a.detector(vec,length(vec))
+%%
+a.detector(tvec,length(tvec))
 

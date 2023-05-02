@@ -11,16 +11,16 @@ classdef xray
         n2=1.5;
         nglass=1.4;
         nair=1;
-        nwater;
+        nwater=1.333;
         beta;
         d;
         si;
         dp; % prism path length
         R;
         R1=100;
-        R2=100;
+        R2=-100;
         f;
-        thick;
+        thick=50;
         lensdiam=20;
         k;
     end
@@ -43,38 +43,46 @@ classdef xray
             mean=30;
             sigma=10;
             %numpoints=10000;
+            %m=pagetranspose(vec);
             m=vec;
+            m=m+70;%round(max(m(:,1,:)));
+            detsize=60;
             %m=sigma*randn(numpoints,2)+mean;
             figure; hold on
-%             for i=1:numpoints
-%             scatter(i,m(:,2,i));
-%             end
-            hold off
-            det=zeros(100);
-            for ll=1:numpoints
-                m=m(:,:,ll);
+            title('array of ray locations (cross section)')
+            xlabel('');ylabel('pix')
             for i=1:numpoints
-                jj=round(m(i,1,ll)/2);
-                kk=round(m(i,2,ll)/2);
-                if jj<1 
-                   jj=1;
+            scatter(i,m(2,:,i));
+            end
+            hold off
+            det=zeros(detsize);
+            for i=1:numpoints
+               
+            for ll=1:numpoints
+                %jj=round(m(i,1,ll)/2);
+                kk=round(m(1,i,ll)/2);
+                if ll<1 
+                   ll=1;
                 end
-                if jj>100 
-                   jj=100;
+                if ll>detsize
+                   ll=detsize;
                 end
-                if kk>100
-                   kk=100;
+                if kk>detsize
+                   kk=detsize;
                 end
                 if kk<1
-                    kk=1;
+                   kk=1;
                 end
                 
-                det(jj,kk)=det(jj,kk)+1;
+                det(ll,kk)=det(ll,kk)+1;
             end
             end
             
             figure; imagesc(det);colormap turbo;
+            title('Intensity detector')
+            xlabel('pix');ylabel('pix')
         end
+
         % the following functions define the matrix representations for
         % geometrical optical ray tracing
 
@@ -91,9 +99,10 @@ classdef xray
             if n1==0 && n2==0
                 out=[1,0;0,dum.n1/dum.n2];
             else
-                out=[1,0;0,n1/n2];
+                out=[1,0;0,n2/n1];
             end
         end
+
         % refraction: curved interface
         function out=curvedrefrac(dum,n1,n2,R)
             if n1==0 && n2==0 && R==0
@@ -102,10 +111,12 @@ classdef xray
                 out=[1,0;(n1-n2)/(R*n2),n1/n2];
             end
         end
+
         % reflection: flat mirror
         function out=mirrorreflec(dum)
             out=[1,0;0,1];
         end
+
         % refraction: thin lens
         function out=thinlens(dum,f)
             if f==0
@@ -114,24 +125,27 @@ classdef xray
                 out=[1,0;-1/f,1];
             end
         end
+
         % refraction: thick lens
         function out=thicklens(dum,n1,n2,R1,R2,t)
             if n1==0&&n2==0&&R1==0&&R2==0&&t==0
-                surf2=[1,0;(dum.n1-dum.n2)./dum.R1*dum.n2,dum.n1./dum.n2];
-                surf1=[1,0;(dum.n2-dum.n1)./dum.R2*dum.n1,dum.n2./dum.n1];
+                surf2=[1,0;(dum.n1-dum.n2)/(dum.R1*dum.n2),dum.n1/dum.n2];
+                surf1=[1,0;(dum.n2-dum.n1)/(dum.R2*dum.n1),dum.n2/dum.n1];
                 thickness=[1,dum.thick;0,1];
                 out=surf2*thickness*surf1;
             else
-                surf1=[1,0;(n1-n2)/(R1*n2),n1/n2];
-                surf2=[1,0;(n2-n1)/(R2*n1),n2/n1];
+                surf2=[1,0;(n1-n2)/(R1*n2),n1/n2];
+                surf1=[1,0;(n2-n1)/(R2*n1),n2/n1];
                 thickness=[1,t;0,1];
                 out=surf2*thickness*surf1;
             end
         end
+
         % refraction: single prism
         function out=singleprism(dum)
             out=[dum.k,dum.dp/n*dum.k;0,1/dum.k];
         end
+
         % function to generate new random angles for each call
         function out=ang(dum,n,so)
             out=2*atan((dum.lensdiam/2)/so)*randn(n,1,n)-atan((dum.lensdiam/2)/so);
