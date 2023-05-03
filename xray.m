@@ -42,12 +42,9 @@ classdef xray
             % dim=linspace(0,30);
             mean=30;
             sigma=10;
-            %numpoints=10000;
-            %m=pagetranspose(vec);
             m=vec;
-            m=m+70;%round(max(m(:,1,:)));
+            m=m+70;
             detsize=60;
-            %m=sigma*randn(numpoints,2)+mean;
             figure; hold on
             title('array of ray locations (cross section)')
             xlabel('x - horizontal');ylabel('y')
@@ -57,9 +54,7 @@ classdef xray
             hold off
             det=zeros(detsize);
             for i=1:numpoints
-               
-            for ll=1:numpoints
-                %jj=round(m(i,1,ll)/2);
+                for ll=1:numpoints
                 kk=round(m(1,i,ll)/2);
                 if ll<1 
                    ll=1;
@@ -73,11 +68,9 @@ classdef xray
                 if kk<1
                    kk=1;
                 end
-                
                 det(ll,kk)=det(ll,kk)+1;
+                end
             end
-            end
-            
             figure; imagesc(imrotate(det,90));colormap turbo;
             title('Intensity detector')
             xlabel('pix');ylabel('pix')
