@@ -14,6 +14,10 @@ classdef xray
         nwater=1.333;
         beta;
         d;
+        sicomplex;
+        socomplex;
+        sot;
+        sit;
         si;
         dp; % prism path length
         R;
@@ -43,13 +47,13 @@ classdef xray
             mean=30;
             sigma=10;
             m=vec;
-            m=m+70;
-            detsize=60;
+            m=m+50;
+            detsize=50;
             figure; hold on
             title('array of ray locations (cross section)')
             xlabel('x - horizontal');ylabel('y')
             for i=1:numpoints
-            scatter(i,m(2,:,i));
+            scatter(i,m(1,:,i));
             end
             hold off
             det=zeros(detsize);

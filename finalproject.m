@@ -80,21 +80,26 @@ hold off;
 %%
 %creation of vectors and propagation of the rays for complex index of
 %refraction
-a.thick=30;
+a.socomplex=5;
+a.sicomplex=30;
+m1c=a.propdist(a.socomplex);
+m5c=a.propdist(a.sicomplex);
+mm1c=repmat(m1c,1,1,n);
+mm5c=repmat(m5c,1,1,n);
 %function call for the interface
-mflat=a.flatrefrac(a.nair,a.ncarbon);
+mflat=a.flatrefrac(a.nair,abs(a.ngold));
 mmflat=repmat(mflat,1,1,n);
 flatvec(1,:,:)=zeros(1,n,n);
-flatvec(2,:,:)=a.ang(n,so);
+flatvec(2,:,:)=a.ang(n,100);
 %propagate n page entries to the surface
-flatvec=pagemtimes(mm1,flatvec);
+flatvec=pagemtimes(mm1c,flatvec);
 yplot=flatvec(1,:,1);
-figure; plot([0,so],[zeros(n,1),yplot'],'r'); title('ray tracing for complex index of refraction')
+figure; plot([0,a.socomplex],[zeros(n,1),yplot'],'r'); title('ray tracing for complex index of refraction')
 xlabel('optical axis');ylabel('y')
 hold on;
 flatvec=pagemtimes(mmflat,flatvec);
 flatvec=pagemtimes(mm5,flatvec);
-plot([so,so+a.thick],[yplot',(flatvec(1,:,1))'],'r');
+plot([a.socomplex,a.socomplex+a.sicomplex],[yplot',(flatvec(1,:,1))'],'r');
 %%
 %propagation through a thick lens. Construction of vector, repmat functions
 %and propagation through the system. The thickl function can take as inputs
@@ -102,24 +107,33 @@ plot([so,so+a.thick],[yplot',(flatvec(1,:,1))'],'r');
 %of lens. Uncommenting thickl(0,0,0,0,0) will run the program with
 %predefined values
 a.thick=100;
+fthick=inv((a.nglass-1)*((1/a.R1)-(1/a.R2)+(((a.nglass-1)*a.thick)/(a.nglass*a.R1*a.R2))));
 thickl=a.thicklens(a.nair,a.nglass,100,-100,a.thick);
+a.sot=fthick+50;
+a.sit=950;
+m1t=a.propdist(a.sot);
+m5t=a.propdist(a.sit);
+mm1t=repmat(m1t,1,1,n);
+mm5t=repmat(m5t,1,1,n);
 %thickl=a.thicklens(0,0,0,0,0);
 mthickl=repmat(thickl,1,1,n);
 %vector and angles creation
 tvec(1,:,:)=zeros(1,n,n);
-tvec(2,:,:)=a.ang(n,so);
+tvec(2,:,:)=a.ang(n,a.sot);
 %propagation
-tvec=pagemtimes(mm1,tvec);
+tvec=pagemtimes(mm1t,tvec);
+%added inensity detector after propagation a.sot
+a.detector(tvec,length(tvec))
 yplot=tvec(1,:,1);
-figure; plot([0,so],[zeros(n,1),yplot(1,:,1)'],'b');
+figure; plot([0,a.sot],[zeros(n,1),yplot(1,:,1)'],'b');
 hold on;
 title('Thick lens')
 xlabel('z - optical axis');ylabel('y')
 tvec=pagemtimes(mthickl,tvec);
-plot([so,so+a.thick],[yplot',(tvec(1,:,1))'],'b');
+plot([a.sot,a.sot+a.thick],[yplot',(tvec(1,:,1))'],'b');
 yplot=tvec(1,:,1);
-tvec=pagemtimes(mm5,tvec);
-plot([so+a.thick,so+a.thick+si],[yplot(1,:,1)',(tvec(1,:,1))'],'b');
+tvec=pagemtimes(mm5t,tvec);
+plot([a.sot+a.thick,a.sot+a.thick+a.sit],[yplot(1,:,1)',(tvec(1,:,1))'],'b');
 %%
 %this function takes the final final propagation information for the
 %vectors and angles, and creates an intensity map of where we would expect
